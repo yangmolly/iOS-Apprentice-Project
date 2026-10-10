@@ -16,6 +16,26 @@
 			path = iOSApprenticeProject;
 			sourceTree = "<group>";
 		};
+		BBAE8226307AE92B00BB1AAF /* Models */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Models;
+			sourceTree = "<group>";
+		};
+		BBAE8227307AE93500BB1AAF /* Components */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Components;
+			sourceTree = "<group>";
+		};
+		BBAE8228307AE94300BB1AAF /* Services */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Services;
+			sourceTree = "<group>";
+		};
+		BBAE822D307AE9AF00BB1AAF /* Features */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Features;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +52,10 @@
 		BBAE8208307AE87500BB1AAF = {
 			isa = PBXGroup;
 			children = (
+				BBAE822D307AE9AF00BB1AAF /* Features */,
+				BBAE8228307AE94300BB1AAF /* Services */,
+				BBAE8227307AE93500BB1AAF /* Components */,
+				BBAE8226307AE92B00BB1AAF /* Models */,
 				BBAE8213307AE87500BB1AAF /* iOSApprenticeProject */,
 				BBAE8212307AE87500BB1AAF /* Products */,
 			);
@@ -62,6 +86,10 @@
 			);
 			fileSystemSynchronizedGroups = (
 				BBAE8213307AE87500BB1AAF /* iOSApprenticeProject */,
+				BBAE8226307AE92B00BB1AAF /* Models */,
+				BBAE8227307AE93500BB1AAF /* Components */,
+				BBAE8228307AE94300BB1AAF /* Services */,
+				BBAE822D307AE9AF00BB1AAF /* Features */,
 			);
 			name = iOSApprenticeProject;
 			packageProductDependencies = (
@@ -85,7 +113,7 @@
 					};
 				};
 			};
-			buildConfigurationList = BBAE820C307AE87500BB1AAF /* Build configuration list for PBXProject "iOSApprenticeProject" */;
+			buildConfigurationList = BBAE820C307AE87500BB1AAF /* Build configuration list for PBXProject "StudySpot" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -309,7 +337,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BBAE820C307AE87500BB1AAF /* Build configuration list for PBXProject "iOSApprenticeProject" */ = {
+		BBAE820C307AE87500BB1AAF /* Build configuration list for PBXProject "StudySpot" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BBAE821A307AE87600BB1AAF /* Debug */,
