@@ -6,3 +6,8 @@
 //
 
 import Foundation
+import Combine
+
+class ExploreViewModel: ObservableObject {
+    @Published var searchText = ""
+}
