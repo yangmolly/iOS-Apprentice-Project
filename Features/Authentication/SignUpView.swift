@@ -16,6 +16,7 @@ struct SignUpView: View {
     @State private var showPassword = false
     @State private var showConfirmPassword = false
     @State private var agreed = false
+    @EnvironmentObject private var auth: AuthViewModel
 
     private enum Field { case name, email, password, confirm }
     @FocusState private var focus: Field?
@@ -89,18 +90,47 @@ struct SignUpView: View {
                 }
                 .padding(.top, 20)
 
+                if let message = auth.errorMessage {
+                    Text(message)
+                        .font(.system(size: 12))
+                        .foregroundColor(.red)
+                        .padding(.top, 16)
+                }
+
+                if auth.needsEmailConfirmation {
+                    Text("Check your email to confirm your account, then sign in.")
+                        .font(.system(size: 12))
+                        .foregroundColor(blue)
+                        .padding(.top, 16)
+                }
+
                 // Sign up button
                 Button {
-                    // TODO: sign up action
+                    Task {
+                        await auth.signUp(
+                            name: name,
+                            email: email,
+                            password: password,
+                            confirmPassword: confirmPassword,
+                            agreed: agreed
+                        )
+                    }
                 } label: {
-                    Text("Sign up")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 48)
-                        .background(blue)
-                        .cornerRadius(8)
+                    Group {
+                        if auth.isLoading {
+                            ProgressView().tint(.white)
+                        } else {
+                            Text("Sign up")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(blue)
+                    .cornerRadius(8)
                 }
+                .disabled(auth.isLoading)
                 .padding(.top, 24)
                 .padding(.bottom, 24)
             }
@@ -155,4 +185,5 @@ struct SignUpView: View {
 
 #Preview {
     SignUpView()
+        .environmentObject(AuthViewModel())
 }

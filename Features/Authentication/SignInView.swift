@@ -14,6 +14,8 @@ struct SignInView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var showPassword = false
+    @State private var showSignUp = false
+    @EnvironmentObject private var auth: AuthViewModel
 
     private let blue = Color(red: 0.02, green: 0.43, blue: 1.0)
     private let headerBlue = Color(red: 0.88, green: 0.99, blue: 0.99)
@@ -98,18 +100,31 @@ struct SignInView: View {
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(blue)
 
+                        if let message = auth.errorMessage {
+                            Text(message)
+                                .font(.system(size: 12))
+                                .foregroundColor(.red)
+                        }
+
                         // Login button
                         Button {
-                            // TODO: login action
+                            Task { await auth.signIn(email: email, password: password) }
                         } label: {
-                            Text("Login")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 48)
-                                .background(blue)
-                                .cornerRadius(8)
+                            Group {
+                                if auth.isLoading {
+                                    ProgressView().tint(.white)
+                                } else {
+                                    Text("Login")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.white)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(blue)
+                            .cornerRadius(8)
                         }
+                        .disabled(auth.isLoading)
                         .padding(.top, 8 * s)
 
                         // Register
@@ -117,7 +132,8 @@ struct SignInView: View {
                             Text("Not a member?")
                                 .foregroundColor(.gray)
                             Button("Register now") {
-                                // TODO: navigate to sign up
+                                auth.errorMessage = nil
+                                showSignUp = true
                             }
                             .foregroundColor(blue)
                             .fontWeight(.medium)
@@ -138,9 +154,15 @@ struct SignInView: View {
             .scrollBounceBehavior(.basedOnSize)
         }
         .background(Color.white)
+        .navigationDestination(isPresented: $showSignUp) {
+            SignUpView()
+        }
     }
 }
 
 #Preview {
-    SignInView()
+    NavigationStack {
+        SignInView()
+    }
+    .environmentObject(AuthViewModel())
 }
