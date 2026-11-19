@@ -16,7 +16,7 @@ struct SignUpView: View {
     @State private var showPassword = false
     @State private var showConfirmPassword = false
     @State private var agreed = false
-    @EnvironmentObject private var auth: AuthViewModel
+    @Environment(AuthViewModel.self) private var auth
 
     private enum Field { case name, email, password, confirm }
     @FocusState private var focus: Field?
@@ -97,12 +97,10 @@ struct SignUpView: View {
                         .padding(.top, 16)
                 }
 
-                if auth.needsEmailConfirmation {
-                    Text("Check your email to confirm your account, then sign in.")
-                        .font(.system(size: 12))
-                        .foregroundColor(blue)
-                        .padding(.top, 16)
-                }
+                Text("Use your @unc.edu address. Passwords need at least \(AuthViewModel.minimumPasswordLength) characters.")
+                    .font(.system(size: 11))
+                    .foregroundColor(.gray)
+                    .padding(.top, 12)
 
                 // Sign up button
                 Button {
@@ -185,5 +183,5 @@ struct SignUpView: View {
 
 #Preview {
     SignUpView()
-        .environmentObject(AuthViewModel())
+        .environment(AuthViewModel.preview())
 }

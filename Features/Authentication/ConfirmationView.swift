@@ -9,10 +9,11 @@ import SwiftUI
 
 struct ConfirmationCodeView: View {
 
+    @Environment(AuthViewModel.self) private var auth
     @State private var code = ""
     @FocusState private var focused: Bool
 
-    private let email = "onyen@unc.edu"
+    private let codeLength = AuthViewModel.codeLength
     private let blue = Color(red: 0.02, green: 0.43, blue: 1.0)
     private let fieldBorder = Color.gray.opacity(0.25)
 
@@ -25,16 +26,16 @@ struct ConfirmationCodeView: View {
             Text("Enter confirmation code")
                 .font(.system(size: 16, weight: .bold))
 
-            Text("A 4-digit code was sent to\n\(email)")
+            Text("A \(codeLength)-digit code was sent to\n\(auth.pendingConfirmationEmail ?? "your email")")
                 .font(.system(size: 11))
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
                 .padding(.top, 8)
 
-            // 4 digit boxes
+            // Digit boxes
             ZStack {
-                HStack(spacing: 12) {
-                    ForEach(0..<4, id: \.self) { index in
+                HStack(spacing: 8) {
+                    ForEach(0..<codeLength, id: \.self) { index in
                         digitBox(at: index)
                     }
                 }
@@ -42,38 +43,59 @@ struct ConfirmationCodeView: View {
                 // Hidden field that drives the number pad
                 TextField("", text: $code)
                     .keyboardType(.numberPad)
+                    .textContentType(.oneTimeCode)
                     .focused($focused)
                     .opacity(0.01)
                     .frame(width: 1, height: 1)
                     .onChange(of: code) { _, newValue in
                         let digits = newValue.filter { $0.isNumber }
-                        code = String(digits.prefix(4))
+                        code = String(digits.prefix(codeLength))
+                        if code.count == codeLength {
+                            Task { await auth.verify(code: code) }
+                        }
                     }
             }
             .padding(.top, 32)
 
+            Group {
+                if let message = auth.errorMessage {
+                    Text(message).foregroundColor(.red)
+                } else if let message = auth.infoMessage {
+                    Text(message).foregroundColor(blue)
+                }
+            }
+            .font(.system(size: 12))
+            .multilineTextAlignment(.center)
+            .padding(.top, 16)
+            .padding(.horizontal, 24)
+
             Spacer()
             Spacer()
 
-            // Resend code
             Button("Resend code") {
-                // TODO: resend code action
+                Task { await auth.resendCode() }
             }
             .font(.system(size: 12, weight: .medium))
             .foregroundColor(blue)
 
-            // Continue button
             Button {
-                // TODO: verify code action
+                Task { await auth.verify(code: code) }
             } label: {
-                Text("Continue")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 48)
-                    .background(blue)
-                    .cornerRadius(8)
+                Group {
+                    if auth.isLoading {
+                        ProgressView().tint(.white)
+                    } else {
+                        Text("Continue")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(blue)
+                .cornerRadius(8)
             }
+            .disabled(auth.isLoading || code.count < codeLength)
             .padding(.top, 20)
             .padding(.horizontal, 24)
             .padding(.bottom, 12)
@@ -100,10 +122,11 @@ struct ConfirmationCodeView: View {
                     .font(.system(size: 14))
             }
         }
-        .frame(width: 48, height: 48)
+        .frame(width: 44, height: 48)
     }
 }
 
 #Preview {
     ConfirmationCodeView()
+        .environment(AuthViewModel.preview())
 }

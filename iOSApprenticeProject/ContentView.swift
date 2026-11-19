@@ -1,25 +1,28 @@
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject private var auth: AuthViewModel
+    @Environment(AuthViewModel.self) private var auth
 
     var body: some View {
         Group {
-            if auth.isSignedIn {
-                ExploreView()
-            } else {
-                NavigationStack {
-                    SignInView()
-                }
+            switch auth.phase {
+            case .launching:
+                ProgressView()
+            case .signedOut:
+                AuthFlowView()
+            case .signedIn:
+                MainTabView()
             }
         }
+        .animation(.default, value: auth.phase)
         .task {
-            await auth.restoreSession()
+            auth.start()
         }
     }
 }
 
 #Preview {
     ContentView()
-        .environmentObject(AuthViewModel())
+        .environment(AuthViewModel.preview())
+        .environment(AppEnvironment.preview())
 }

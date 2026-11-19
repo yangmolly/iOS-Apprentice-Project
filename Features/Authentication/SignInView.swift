@@ -11,11 +11,12 @@ import SwiftUI
 
 struct SignInView: View {
 
+    var onRegister: () -> Void = {}
+
     @State private var email = ""
     @State private var password = ""
     @State private var showPassword = false
-    @State private var showSignUp = false
-    @EnvironmentObject private var auth: AuthViewModel
+    @Environment(AuthViewModel.self) private var auth
 
     private let blue = Color(red: 0.02, green: 0.43, blue: 1.0)
     private let headerBlue = Color(red: 0.88, green: 0.99, blue: 0.99)
@@ -106,6 +107,12 @@ struct SignInView: View {
                                 .foregroundColor(.red)
                         }
 
+                        if let message = auth.infoMessage {
+                            Text(message)
+                                .font(.system(size: 12))
+                                .foregroundColor(blue)
+                        }
+
                         // Login button
                         Button {
                             Task { await auth.signIn(email: email, password: password) }
@@ -133,7 +140,8 @@ struct SignInView: View {
                                 .foregroundColor(.gray)
                             Button("Register now") {
                                 auth.errorMessage = nil
-                                showSignUp = true
+                                auth.infoMessage = nil
+                                onRegister()
                             }
                             .foregroundColor(blue)
                             .fontWeight(.medium)
@@ -154,9 +162,6 @@ struct SignInView: View {
             .scrollBounceBehavior(.basedOnSize)
         }
         .background(Color.white)
-        .navigationDestination(isPresented: $showSignUp) {
-            SignUpView()
-        }
     }
 }
 
@@ -164,5 +169,5 @@ struct SignInView: View {
     NavigationStack {
         SignInView()
     }
-    .environmentObject(AuthViewModel())
+    .environment(AuthViewModel.preview())
 }

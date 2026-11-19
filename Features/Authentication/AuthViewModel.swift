@@ -7,100 +7,193 @@
 //
 
 import Foundation
-import Combine
-import Supabase
+import Observation
 
-@MainActor
-final class AuthViewModel: ObservableObject {
-    @Published var isSignedIn = false
-    @Published var isLoading = false
-    @Published var errorMessage: String?
-    /// True when sign-up worked but Supabase still wants the email confirmed.
-    @Published var needsEmailConfirmation = false
-    @Published var currentUserId: UUID?
+@Observable
+final class AuthViewModel {
+    enum Phase: Equatable {
+        /// Waiting for the stored session on launch.
+        case launching
+        case signedOut
+        case signedIn
+    }
 
-    /// Call on launch so returning users stay signed in.
-    func restoreSession() async {
-        do {
-            let session = try await supabase.auth.session
-            currentUserId = session.user.id
-            isSignedIn = true
-        } catch {
-            currentUserId = nil
-            isSignedIn = false
+    static let requiredDomain = "@unc.edu"
+    static let minimumPasswordLength = 8
+    static let codeLength = 6
+
+    private(set) var phase: Phase = .launching
+    private(set) var isLoading = false
+    var errorMessage: String?
+    var infoMessage: String?
+    /// Set when an account needs its email confirmed. Drives navigation to the code screen.
+    var pendingConfirmationEmail: String?
+
+    @ObservationIgnored private let repository: AuthRepository
+    @ObservationIgnored private let env: AppEnvironment
+    @ObservationIgnored private var listener: Task<Void, Never>?
+
+    init(repository: AuthRepository, env: AppEnvironment) {
+        self.repository = repository
+        self.env = env
+    }
+
+    /// Start following auth state. Call once on launch.
+    func start() {
+        guard listener == nil else { return }
+        let stream = repository.authStateChanges()
+        listener = Task { [weak self] in
+            for await user in stream {
+                self?.apply(user)
+            }
         }
     }
 
+    // MARK: - Actions
+
     func signIn(email: String, password: String) async {
-        errorMessage = nil
-        guard !email.isEmpty, !password.isEmpty else {
-            errorMessage = "Enter your email and password."
+        clearMessages()
+        let email = Self.normalize(email)
+        if let problem = Self.validateSignIn(email: email, password: password) {
+            errorMessage = problem
             return
         }
         isLoading = true
         defer { isLoading = false }
         do {
-            let session = try await supabase.auth.signIn(email: email, password: password)
-            currentUserId = session.user.id
-            isSignedIn = true
+            apply(try await repository.signIn(email: email, password: password))
         } catch {
-            errorMessage = error.localizedDescription
+            if Self.isEmailNotConfirmed(error) {
+                pendingConfirmationEmail = email
+                infoMessage = "Confirm your email first. We can resend the code."
+            } else {
+                errorMessage = Self.friendlyMessage(for: error)
+            }
         }
     }
 
     func signUp(name: String, email: String, password: String, confirmPassword: String, agreed: Bool) async {
-        errorMessage = nil
-        needsEmailConfirmation = false
-
-        guard !name.trimmingCharacters(in: .whitespaces).isEmpty else {
-            errorMessage = "Enter your name."
+        clearMessages()
+        let email = Self.normalize(email)
+        if let problem = Self.validateSignUp(name: name, email: email, password: password,
+                                             confirmPassword: confirmPassword, agreed: agreed) {
+            errorMessage = problem
             return
         }
-        guard email.contains("@") else {
-            errorMessage = "Enter a valid email address."
-            return
-        }
-        guard password.count >= 6 else {
-            errorMessage = "Password must be at least 6 characters."
-            return
-        }
-        guard password == confirmPassword else {
-            errorMessage = "Passwords don't match."
-            return
-        }
-        guard agreed else {
-            errorMessage = "Please agree to the Terms and Privacy Policy."
-            return
-        }
-
         isLoading = true
         defer { isLoading = false }
         do {
-            // The "name" is stored in user metadata; the database trigger
-            // copies it into the profiles table.
-            let response = try await supabase.auth.signUp(
-                email: email,
-                password: password,
-                data: ["name": .string(name)]
-            )
-            if let session = response.session {
-                currentUserId = session.user.id
-                isSignedIn = true
+            let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            if let user = try await repository.signUp(name: name, email: email, password: password) {
+                apply(user)
             } else {
-                needsEmailConfirmation = true
+                pendingConfirmationEmail = email
             }
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = Self.friendlyMessage(for: error)
+        }
+    }
+
+    func verify(code: String) async {
+        clearMessages()
+        guard let email = pendingConfirmationEmail else { return }
+        let digits = code.filter(\.isNumber)
+        guard digits.count == Self.codeLength else {
+            errorMessage = "Enter the \(Self.codeLength)-digit code from your email."
+            return
+        }
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            apply(try await repository.verifySignUp(email: email, code: digits))
+            pendingConfirmationEmail = nil
+        } catch {
+            errorMessage = Self.friendlyMessage(for: error)
+        }
+    }
+
+    func resendCode() async {
+        clearMessages()
+        guard let email = pendingConfirmationEmail else { return }
+        do {
+            try await repository.resendConfirmation(email: email)
+            infoMessage = "We sent a new code to \(email)."
+        } catch {
+            errorMessage = Self.friendlyMessage(for: error)
         }
     }
 
     func signOut() async {
-        do {
-            try await supabase.auth.signOut()
-        } catch {
-            errorMessage = error.localizedDescription
+        try? await repository.signOut()
+        apply(nil)
+    }
+
+    // MARK: - State
+
+    private func apply(_ user: AuthUser?) {
+        if let user {
+            let isNewUser = env.session.userId != user.id
+            env.session.userId = user.id
+            env.session.email = user.email
+            phase = .signedIn
+            if isNewUser {
+                env.loadCached()
+                Task { await env.refreshAll() }
+            }
+        } else {
+            if env.session.userId != nil { env.reset() }
+            phase = .signedOut
         }
-        currentUserId = nil
-        isSignedIn = false
+    }
+
+    private func clearMessages() {
+        errorMessage = nil
+        infoMessage = nil
+    }
+
+    // MARK: - Validation (pure, unit-tested)
+
+    static func normalize(_ email: String) -> String {
+        email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+
+    static func isUNCEmail(_ email: String) -> Bool {
+        let email = normalize(email)
+        guard email.hasSuffix(requiredDomain) else { return false }
+        let local = email.dropLast(requiredDomain.count)
+        return !local.isEmpty && !local.contains("@") && !local.contains(" ")
+    }
+
+    static func validateSignIn(email: String, password: String) -> String? {
+        if email.isEmpty || password.isEmpty { return "Enter your email and password." }
+        if !isUNCEmail(email) { return "Use your @unc.edu email address." }
+        return nil
+    }
+
+    static func validateSignUp(name: String, email: String, password: String,
+                               confirmPassword: String, agreed: Bool) -> String? {
+        if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return "Enter your name." }
+        if !isUNCEmail(email) { return "Use your @unc.edu email address." }
+        if password.count < minimumPasswordLength {
+            return "Password must be at least \(minimumPasswordLength) characters."
+        }
+        if password != confirmPassword { return "Passwords don't match." }
+        if !agreed { return "Please agree to the Terms and Privacy Policy." }
+        return nil
+    }
+
+    static func isEmailNotConfirmed(_ error: Error) -> Bool {
+        let text = "\(error) \(error.localizedDescription)".lowercased()
+        return text.contains("email_not_confirmed") || text.contains("email not confirmed")
+    }
+
+    static func friendlyMessage(for error: Error) -> String {
+        if error is URLError { return "You're offline. Check your connection and try again." }
+        let text = error.localizedDescription
+        if text.lowercased().contains("invalid login credentials") { return "Wrong email or password." }
+        if text.contains("Only @unc.edu") || text.lowercased().contains("database error saving new user") {
+            return "Use your @unc.edu email address."
+        }
+        return text
     }
 }
