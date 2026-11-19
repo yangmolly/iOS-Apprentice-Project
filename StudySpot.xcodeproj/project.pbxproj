@@ -129,7 +129,6 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				BB2C7CAE30A037C500A33A89 /* supabase */,
 				BBAE8213307AE87500BB1AAF /* iOSApprenticeProject */,
 				BBAE8226307AE92B00BB1AAF /* Models */,
 				BBAE8227307AE93500BB1AAF /* Components */,

@@ -19,7 +19,7 @@ StudySpot is a SwiftUI iOS app for UNC students to find study spots, review them
 
 ## Project layout quirk
 
-The top-level folders `iOSApprenticeProject/`, `Features/`, `Models/`, `Services/`, `Components/` and `supabase/` are Xcode **file-system synchronized groups**. Any `.swift` file you add under them is compiled automatically, so you don't need to edit `project.pbxproj`. Everything shares one module, so there are no imports between folders.
+The top-level folders `iOSApprenticeProject/`, `Features/`, `Models/`, `Services/` and `Components/` are Xcode **file-system synchronized groups** in the app target. Any `.swift` file you add under them is compiled automatically, so you don't need to edit `project.pbxproj`. Other files in them, such as `.sql` or `.example` files, get copied into the app bundle. `supabase/` shows up in the navigator but isn't part of the target. Everything shares one module, so there are no imports between folders.
 
 ## Architecture
 
