@@ -21,7 +21,7 @@ struct SpotRepositoryTests {
 
         // A fresh repository over the same store sees the cached data with no network.
         t.remote.readError = Fixtures.networkError
-        let reloaded = SpotRepository(remote: t.remote, cache: CacheStore(context: t.env.modelContainer.mainContext),
+        let reloaded = SpotRepository(remote: t.remote, cache: CacheStore(container: t.env.modelContainer),
                                       sync: t.env.sync)
         reloaded.loadCached()
         #expect(reloaded.spots.count == 2)
@@ -63,6 +63,22 @@ struct SpotRepositoryTests {
         spot.reviewCount = 3
         t.env.spots.apply(spot)
         #expect(t.env.spots.spot(id: spot.id)?.avgRating == 8.4)
+    }
+
+    /// Regression: repositories used to hold only a ModelContext, so writing after the
+    /// AppEnvironment (the container's owner) was released trapped inside SwiftData.
+    @Test func repositoriesOutliveTheirEnvironment() async throws {
+        var events: EventRepository?
+        do {
+            let t = TestEnv()
+            let event = Fixtures.event("Review", rsvps: 0)
+            t.remote.events = [event]
+            try await t.env.events.refresh()
+            events = t.env.events
+        }
+        let repo = try #require(events)
+        try await repo.setRSVP(eventId: repo.events[0].id, going: true)
+        #expect(repo.events[0].rsvpCount == 1)
     }
 }
 

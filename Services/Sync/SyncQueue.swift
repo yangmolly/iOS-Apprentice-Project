@@ -53,14 +53,16 @@ final class SyncQueue {
     /// Called after a background flush permanently drops a write, so repositories can roll back their optimistic change.
     var onPermanentFailure: ((WriteOperation) -> Void)?
 
-    private let context: ModelContext
+    /// Held (not just its context) so the queue keeps its store alive; see CacheStore.
+    private let container: ModelContainer
+    private var context: ModelContext { container.mainContext }
     private let remote: RemoteDataSource
     private let isOnline: () -> Bool
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
-    init(context: ModelContext, remote: RemoteDataSource, isOnline: @escaping () -> Bool) {
-        self.context = context
+    init(container: ModelContainer, remote: RemoteDataSource, isOnline: @escaping () -> Bool) {
+        self.container = container
         self.remote = remote
         self.isOnline = isOnline
         refreshCount()

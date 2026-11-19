@@ -33,12 +33,15 @@ final class CachedRecord {
 }
 
 final class CacheStore {
-    private let context: ModelContext
+    /// Held so the store outlives whoever created it: a ModelContext doesn't keep its container alive,
+    /// and using a context after its container is freed traps inside SwiftData.
+    private let container: ModelContainer
+    private var context: ModelContext { container.mainContext }
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
-    init(context: ModelContext) {
-        self.context = context
+    init(container: ModelContainer) {
+        self.container = container
     }
 
     func load<T: Decodable>(_ kind: CacheKind, as type: T.Type = T.self) -> [T] {

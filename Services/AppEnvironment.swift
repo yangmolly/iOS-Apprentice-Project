@@ -34,10 +34,9 @@ final class AppEnvironment {
         self.modelContainer = modelContainer
         self.network = network
         self.spotFeed = spotFeed
-        let context = modelContainer.mainContext
         let session = UserSession()
-        let cache = CacheStore(context: context)
-        let sync = SyncQueue(context: context, remote: remote,
+        let cache = CacheStore(container: modelContainer)
+        let sync = SyncQueue(container: modelContainer, remote: remote,
                              isOnline: isOnline ?? { [network] in network.isOnline })
         self.session = session
         self.cache = cache
