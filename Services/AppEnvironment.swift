@@ -26,11 +26,14 @@ final class AppEnvironment {
 
     @ObservationIgnored let modelContainer: ModelContainer
     @ObservationIgnored private let cache: CacheStore
+    @ObservationIgnored private let spotFeed: SpotChangeFeed?
 
     init(modelContainer: ModelContainer, remote: RemoteDataSource,
-         network: NetworkMonitor = NetworkMonitor(), isOnline: (() -> Bool)? = nil) {
+         network: NetworkMonitor = NetworkMonitor(), isOnline: (() -> Bool)? = nil,
+         spotFeed: SpotChangeFeed? = nil) {
         self.modelContainer = modelContainer
         self.network = network
+        self.spotFeed = spotFeed
         let context = modelContainer.mainContext
         let session = UserSession()
         let cache = CacheStore(context: context)
@@ -57,7 +60,8 @@ final class AppEnvironment {
     }
 
     static func live() -> AppEnvironment {
-        let env = AppEnvironment(modelContainer: makeContainer(), remote: SupabaseRemote())
+        let env = AppEnvironment(modelContainer: makeContainer(), remote: SupabaseRemote(),
+                                 spotFeed: SupabaseSpotChangeFeed())
         env.network.start()
         return env
     }
@@ -71,6 +75,15 @@ final class AppEnvironment {
         // The on-disk store couldn't be opened. Run with an in-memory cache rather than crash.
         let fallback = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         return try! ModelContainer(for: schema, configurations: fallback)
+    }
+
+    /// A user just signed in (or was restored on launch): cached data now, live updates, then a refresh.
+    func startSession() {
+        loadCached()
+        spotFeed?.start { [weak self] spot in
+            self?.spots.apply(spot)
+        }
+        Task { await refreshAll() }
     }
 
     /// Show cached data immediately.
@@ -100,6 +113,7 @@ final class AppEnvironment {
 
     /// Clear everything belonging to the signed-out user.
     func reset() {
+        spotFeed?.stop()
         sync.clear()
         cache.clearAll()
         session.userId = nil

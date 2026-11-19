@@ -137,8 +137,7 @@ final class AuthViewModel {
             env.session.email = user.email
             phase = .signedIn
             if isNewUser {
-                env.loadCached()
-                Task { await env.refreshAll() }
+                env.startSession()
             }
         } else {
             if env.session.userId != nil { env.reset() }

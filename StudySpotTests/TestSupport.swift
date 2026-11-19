@@ -88,6 +88,26 @@ final class MockRemote: RemoteDataSource {
     func fetchProfile(userId: UUID) async throws -> UserProfile { try read(); return profile }
 }
 
+final class MockSpotFeed: SpotChangeFeed {
+    private(set) var isRunning = false
+    private var onChange: ((StudySpot) -> Void)?
+
+    func start(onChange: @escaping (StudySpot) -> Void) {
+        isRunning = true
+        self.onChange = onChange
+    }
+
+    func stop() {
+        isRunning = false
+        onChange = nil
+    }
+
+    /// Simulates a Realtime message.
+    func send(_ spot: StudySpot) {
+        onChange?(spot)
+    }
+}
+
 /// Lets a test flip connectivity.
 final class Connectivity {
     var isOnline: Bool
@@ -98,12 +118,15 @@ struct TestEnv {
     let env: AppEnvironment
     let remote: MockRemote
     let connectivity: Connectivity
+    let feed: MockSpotFeed
 
     init(online: Bool = true, signedIn: Bool = true) {
         let remote = MockRemote()
         let connectivity = Connectivity(online)
+        let feed = MockSpotFeed()
         env = AppEnvironment(modelContainer: AppEnvironment.makeContainer(inMemory: true),
-                             remote: remote, isOnline: { connectivity.isOnline })
+                             remote: remote, isOnline: { connectivity.isOnline }, spotFeed: feed)
+        self.feed = feed
         if signedIn {
             env.session.userId = Fixtures.userId
             env.session.email = "alice@unc.edu"
