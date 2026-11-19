@@ -2,13 +2,13 @@
 //  SupabaseConfig.swift
 //  iOSApprenticeProject
 //
+//  Values come from Services/Secrets.swift, which is gitignored.
+//  Template: Secrets.swift.example at the repo root.
+//
 
 import Foundation
 
 enum SupabaseConfig {
-    static let url = URL(string: "https://fxahtcoctoadbukbfrsc.supabase.co")!
-
-    /// Paste your anon / publishable key here (Supabase dashboard -> Project Settings -> API).
-    /// Never put the service_role key in the app.
-    static let anonKey = "sb_publishable_w0iPrCHbx0JUEj4ttOl-CA__tecWMf0"
+    static let url = URL(string: Secrets.supabaseURL)!
+    static let anonKey = Secrets.supabaseAnonKey
 }

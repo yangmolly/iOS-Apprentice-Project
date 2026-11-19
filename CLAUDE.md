@@ -27,7 +27,7 @@ The top-level folders `iOSApprenticeProject/`, `Features/`, `Models/`, `Services
 - **Features:** each feature under `Features/<Name>/` pairs a view with a view model. Only `AuthViewModel` currently talks to Supabase. The other view models (Explore, Favorites, Groups, Profile) are mostly UI-state stubs that still need to be wired to the backend.
 - **Data access:**
   - `Services/SupabaseManager.swift` defines one global `supabase` client.
-  - `Services/SupabaseConfig.swift` holds the project URL and the publishable/anon key. Never put the service_role key in the app.
+  - `Services/SupabaseConfig.swift` reads the project URL and publishable/anon key from `Services/Secrets.swift`, which is gitignored. A fresh clone won't build until you copy `Secrets.swift.example` (at the repo root) to `Services/Secrets.swift` and fill it in. The template stays at the root because anything inside a synced folder gets copied into the app bundle. Never put the service_role key in the app.
   - `Services/StudyRepository.swift` is a static enum, and all table reads and writes are meant to go through it, not through `supabase.from(...)` calls in views.
 - **Models** (`Models/`) mirror the database rows. They are snake_case in Postgres, so each model uses explicit `CodingKeys`. Reads use full `Codable` row structs (`Event`, `Review`, `StudySpot`, `UserProfile`). Inserts use separate `Encodable` `New*` structs (`NewEvent`, `NewReview`) that leave out server-generated `id` and `created_at` fields. Study groups are not their own table: they are `events` rows with `category = study_group`, and `EventCategory` must stay in sync with the Postgres `event_category` enum.
 
