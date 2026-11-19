@@ -12,6 +12,9 @@ struct MapTabView: View {
 
     @State private var position: MapCameraPosition = MapTabView.campusCamera
     @State private var selectedSpotId: UUID?
+    @State private var visibleCenter = CLLocationCoordinate2D(latitude: Theme.campusCenter.latitude,
+                                                              longitude: Theme.campusCenter.longitude)
+    @State private var addSpot: AddSpotViewModel?
 
     static let campusCamera: MapCameraPosition = .region(
         MKCoordinateRegion(
@@ -33,6 +36,9 @@ struct MapTabView: View {
                 UserAnnotation()
             }
             .mapStyle(.standard(pointsOfInterest: .including([.university, .library, .cafe])))
+            .onMapCameraChange(frequency: .onEnd) { context in
+                visibleCenter = context.region.center
+            }
             .mapControls {
                 MapUserLocationButton()
                 MapCompass()
@@ -57,6 +63,24 @@ struct MapTabView: View {
                     Button("Campus", systemImage: "building.columns") {
                         withAnimation { position = Self.campusCamera }
                     }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Add spot", systemImage: "plus") {
+                        // Start the pin where the map is looking.
+                        addSpot = AddSpotViewModel(spots: env.spots, session: env.session,
+                                                   coordinate: visibleCenter)
+                    }
+                }
+            }
+            .sheet(item: $addSpot) { vm in
+                AddSpotView(viewModel: vm) { spotId in
+                    if let spot = env.spots.spot(id: spotId) {
+                        withAnimation {
+                            position = .region(MKCoordinateRegion(center: spot.coordinate,
+                                                                  latitudinalMeters: 400, longitudinalMeters: 400))
+                        }
+                    }
+                    selectedSpotId = spotId
                 }
             }
             .sheet(item: selectedSpotBinding) { spot in
