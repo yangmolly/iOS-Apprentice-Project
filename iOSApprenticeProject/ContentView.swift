@@ -25,4 +25,5 @@ struct ContentView: View {
     ContentView()
         .environment(AuthViewModel.preview())
         .environment(AppEnvironment.preview())
+        .environment(LocationService())
 }

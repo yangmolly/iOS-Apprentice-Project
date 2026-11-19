@@ -154,6 +154,21 @@ enum RatingBucket: String, Codable, CaseIterable, Identifiable, Hashable {
         case .disliked: return "I didn't like it"
         }
     }
+
+    /// The 0–10 scores a bucket covers. Scores are rounded to 0.1, so the ranges don't overlap.
+    var range: ClosedRange<Double> {
+        switch self {
+        case .liked: return 6.7...10.0
+        case .fine: return 3.4...6.6
+        case .disliked: return 0.0...3.3
+        }
+    }
+
+    static func containing(_ score: Double) -> RatingBucket {
+        if score >= RatingBucket.liked.range.lowerBound { return .liked }
+        if score >= RatingBucket.fine.range.lowerBound { return .fine }
+        return .disliked
+    }
 }
 
 /// A row in the `reviews` table. One per user per spot.

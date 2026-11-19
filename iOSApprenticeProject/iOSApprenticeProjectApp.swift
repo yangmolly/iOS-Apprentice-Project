@@ -12,6 +12,7 @@ import SwiftUI
 struct iOSApprenticeProjectApp: App {
     @State private var env: AppEnvironment
     @State private var auth: AuthViewModel
+    @State private var location = LocationService()
 
     init() {
         let env = AppEnvironment.live()
@@ -24,6 +25,7 @@ struct iOSApprenticeProjectApp: App {
             ContentView()
                 .environment(env)
                 .environment(auth)
+                .environment(location)
                 .modelContainer(env.modelContainer)
         }
     }

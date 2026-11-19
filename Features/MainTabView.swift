@@ -15,7 +15,7 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $selection) {
             SwiftUI.Tab("Map", systemImage: "map", value: Tab.map) {
-                PlaceholderTab(title: "Map")
+                MapTabView()
             }
             SwiftUI.Tab("Spots", systemImage: "list.bullet", value: Tab.spots) {
                 PlaceholderTab(title: "Spots")
@@ -69,4 +69,5 @@ private struct ProfilePlaceholder: View {
     MainTabView()
         .environment(AuthViewModel.preview())
         .environment(AppEnvironment.preview())
+        .environment(LocationService())
 }
