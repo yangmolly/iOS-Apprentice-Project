@@ -18,7 +18,7 @@ struct MainTabView: View {
                 MapTabView()
             }
             SwiftUI.Tab("Spots", systemImage: "list.bullet", value: Tab.spots) {
-                PlaceholderTab(title: "Spots")
+                SpotsListView()
             }
             SwiftUI.Tab("Events", systemImage: "calendar", value: Tab.events) {
                 PlaceholderTab(title: "Events")
