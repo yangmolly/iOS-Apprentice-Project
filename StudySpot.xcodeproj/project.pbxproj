@@ -10,8 +10,19 @@
 		BB2C7CF230A15A7300A33A89 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = BB2C7CF130A15A7300A33A89 /* Supabase */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		CC0000000000000000000007 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BBAE8209307AE87500BB1AAF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BBAE8210307AE87500BB1AAF;
+			remoteInfo = iOSApprenticeProject;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		BBAE8211307AE87500BB1AAF /* iOSApprenticeProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSApprenticeProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC0000000000000000000002 /* StudySpotTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StudySpotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -45,6 +56,11 @@
 			path = Features;
 			sourceTree = "<group>";
 		};
+		CC0000000000000000000001 /* StudySpotTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = StudySpotTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +69,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				BB2C7CF230A15A7300A33A89 /* Supabase in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CC0000000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -76,6 +99,7 @@
 				BBAE8213307AE87500BB1AAF /* iOSApprenticeProject */,
 				BBAE8212307AE87500BB1AAF /* Products */,
 				BB2C7CAE30A037C500A33A89 /* supabase */,
+				CC0000000000000000000001 /* StudySpotTests */,
 				BB2C7CF030A15A7300A33A89 /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -84,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				BBAE8211307AE87500BB1AAF /* iOSApprenticeProject.app */,
+				CC0000000000000000000002 /* StudySpotTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -119,6 +144,29 @@
 			productReference = BBAE8211307AE87500BB1AAF /* iOSApprenticeProject.app */;
 			productType = "com.apple.product-type.application";
 		};
+		CC0000000000000000000003 /* StudySpotTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CC0000000000000000000009 /* Build configuration list for PBXNativeTarget "StudySpotTests" */;
+			buildPhases = (
+				CC0000000000000000000004 /* Sources */,
+				CC0000000000000000000005 /* Frameworks */,
+				CC0000000000000000000006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CC0000000000000000000008 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CC0000000000000000000001 /* StudySpotTests */,
+			);
+			name = StudySpotTests;
+			packageProductDependencies = (
+			);
+			productName = StudySpotTests;
+			productReference = CC0000000000000000000002 /* StudySpotTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -131,6 +179,10 @@
 				TargetAttributes = {
 					BBAE8210307AE87500BB1AAF = {
 						CreatedOnToolsVersion = 26.2;
+					};
+					CC0000000000000000000003 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = BBAE8210307AE87500BB1AAF;
 					};
 				};
 			};
@@ -152,12 +204,20 @@
 			projectRoot = "";
 			targets = (
 				BBAE8210307AE87500BB1AAF /* iOSApprenticeProject */,
+				CC0000000000000000000003 /* StudySpotTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		BBAE820F307AE87500BB1AAF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CC0000000000000000000006 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -174,7 +234,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CC0000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CC0000000000000000000008 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BBAE8210307AE87500BB1AAF /* iOSApprenticeProject */;
+			targetProxy = CC0000000000000000000007 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		BBAE821A307AE87600BB1AAF /* Debug */ = {
@@ -358,6 +433,48 @@
 			};
 			name = Release;
 		};
+		CC000000000000000000000A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.appteamcarolina.StudySpotTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iOSApprenticeProject.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/iOSApprenticeProject";
+			};
+			name = Debug;
+		};
+		CC000000000000000000000B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.appteamcarolina.StudySpotTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iOSApprenticeProject.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/iOSApprenticeProject";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -375,6 +492,15 @@
 			buildConfigurations = (
 				BBAE821D307AE87600BB1AAF /* Debug */,
 				BBAE821E307AE87600BB1AAF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CC0000000000000000000009 /* Build configuration list for PBXNativeTarget "StudySpotTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CC000000000000000000000A /* Debug */,
+				CC000000000000000000000B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
