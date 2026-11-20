@@ -33,21 +33,21 @@ struct EmailNotConfirmed: LocalizedError {
 }
 
 struct AuthValidationTests {
-    @Test(arguments: ["onyen@unc.edu", "  Onyen@UNC.EDU ", "first.last@unc.edu"])
-    func acceptsUNCEmails(_ email: String) {
-        #expect(AuthViewModel.isUNCEmail(email))
+    @Test(arguments: ["onyen@unc.edu", "  Onyen@UNC.EDU ", "first.last@gmail.com", "a@ad.unc.edu"])
+    func acceptsAnyDomain(_ email: String) {
+        #expect(AuthViewModel.isValidEmail(email))
     }
 
-    @Test(arguments: ["onyen@gmail.com", "@unc.edu", "a@b@unc.edu", "onyen@unc.edu.evil.com",
-                      "onyen@ad.unc.edu", "onyen@notunc.edu", "on yen@unc.edu", ""])
-    func rejectsNonUNCEmails(_ email: String) {
-        #expect(!AuthViewModel.isUNCEmail(email))
+    @Test(arguments: ["onyen", "@unc.edu", "a@b@unc.edu", "onyen@", "onyen@localhost",
+                      "onyen@.com", "onyen@gmail.", "onyen@gmail..com", "on yen@unc.edu", ""])
+    func rejectsMalformedEmails(_ email: String) {
+        #expect(!AuthViewModel.isValidEmail(email))
     }
 
     @Test func signUpValidationOrder() {
         let ok = (name: "Alice", email: "alice@unc.edu", pw: "password1")
         #expect(AuthViewModel.validateSignUp(name: " ", email: ok.email, password: ok.pw, confirmPassword: ok.pw, agreed: true) == "Enter your name.")
-        #expect(AuthViewModel.validateSignUp(name: ok.name, email: "a@gmail.com", password: ok.pw, confirmPassword: ok.pw, agreed: true) == "Use your @unc.edu email address.")
+        #expect(AuthViewModel.validateSignUp(name: ok.name, email: "not-an-email", password: ok.pw, confirmPassword: ok.pw, agreed: true) == "Enter a valid email address.")
         #expect(AuthViewModel.validateSignUp(name: ok.name, email: ok.email, password: "short", confirmPassword: "short", agreed: true) == "Password must be at least 8 characters.")
         #expect(AuthViewModel.validateSignUp(name: ok.name, email: ok.email, password: ok.pw, confirmPassword: "different", agreed: true) == "Passwords don't match.")
         #expect(AuthViewModel.validateSignUp(name: ok.name, email: ok.email, password: ok.pw, confirmPassword: ok.pw, agreed: false) == "Please agree to the Terms and Privacy Policy.")
@@ -56,8 +56,8 @@ struct AuthValidationTests {
 
     @Test func friendlyMessages() {
         #expect(AuthViewModel.friendlyMessage(for: URLError(.notConnectedToInternet)).contains("offline"))
-        struct E: LocalizedError { var errorDescription: String? { "Database error saving new user" } }
-        #expect(AuthViewModel.friendlyMessage(for: E()) == "Use your @unc.edu email address.")
+        struct E: LocalizedError { var errorDescription: String? { "Invalid login credentials" } }
+        #expect(AuthViewModel.friendlyMessage(for: E()) == "Wrong email or password.")
     }
 }
 
@@ -89,10 +89,10 @@ struct AuthViewModelTests {
         try await waitUntil { vm.phase == .signedOut }
     }
 
-    @Test func signInRejectsNonUNCWithoutCallingServer() async {
+    @Test func signInRejectsMalformedEmailWithoutCallingServer() async {
         let (vm, repo, _) = make()
-        await vm.signIn(email: "alice@gmail.com", password: "password1")
-        #expect(vm.errorMessage == "Use your @unc.edu email address.")
+        await vm.signIn(email: "alice", password: "password1")
+        #expect(vm.errorMessage == "Enter a valid email address.")
         #expect(repo.calls.isEmpty)
     }
 

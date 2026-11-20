@@ -56,7 +56,7 @@ struct SignInView: View {
                             .padding(.bottom, 8)
 
                         // Email
-                        TextField("Enter your @unc.edu email", text: $email)
+                        TextField("Enter your email", text: $email)
                             .keyboardType(.emailAddress)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()

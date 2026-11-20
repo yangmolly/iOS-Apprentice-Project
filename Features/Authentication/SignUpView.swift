@@ -49,7 +49,7 @@ struct SignUpView: View {
 
                 // Email
                 label("Email Address").padding(.top, 20)
-                TextField("onyen@unc.edu", text: $email)
+                TextField("you@example.com", text: $email)
                     .focused($focus, equals: .email)
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
@@ -97,7 +97,7 @@ struct SignUpView: View {
                         .padding(.top, 16)
                 }
 
-                Text("Use your @unc.edu address. Passwords need at least \(AuthViewModel.minimumPasswordLength) characters.")
+                Text("Passwords need at least \(AuthViewModel.minimumPasswordLength) characters.")
                     .font(.system(size: 11))
                     .foregroundColor(.gray)
                     .padding(.top, 12)

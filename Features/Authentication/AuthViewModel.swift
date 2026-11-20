@@ -18,7 +18,6 @@ final class AuthViewModel {
         case signedIn
     }
 
-    static let requiredDomain = "@unc.edu"
     static let minimumPasswordLength = 8
     static let codeLength = 6
 
@@ -156,23 +155,24 @@ final class AuthViewModel {
         email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
 
-    static func isUNCEmail(_ email: String) -> Bool {
-        let email = normalize(email)
-        guard email.hasSuffix(requiredDomain) else { return false }
-        let local = email.dropLast(requiredDomain.count)
-        return !local.isEmpty && !local.contains("@") && !local.contains(" ")
+    /// A light shape check (one "@", a dotted domain, no spaces). The server's confirmation email is the real test.
+    static func isValidEmail(_ email: String) -> Bool {
+        let parts = normalize(email).split(separator: "@", omittingEmptySubsequences: false)
+        guard parts.count == 2, !parts[0].isEmpty, !parts.joined().contains(" ") else { return false }
+        let domain = parts[1]
+        return domain.contains(".") && !domain.hasPrefix(".") && !domain.hasSuffix(".") && !domain.contains("..")
     }
 
     static func validateSignIn(email: String, password: String) -> String? {
         if email.isEmpty || password.isEmpty { return "Enter your email and password." }
-        if !isUNCEmail(email) { return "Use your @unc.edu email address." }
+        if !isValidEmail(email) { return "Enter a valid email address." }
         return nil
     }
 
     static func validateSignUp(name: String, email: String, password: String,
                                confirmPassword: String, agreed: Bool) -> String? {
         if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return "Enter your name." }
-        if !isUNCEmail(email) { return "Use your @unc.edu email address." }
+        if !isValidEmail(email) { return "Enter a valid email address." }
         if password.count < minimumPasswordLength {
             return "Password must be at least \(minimumPasswordLength) characters."
         }
@@ -190,9 +190,6 @@ final class AuthViewModel {
         if error is URLError { return "You're offline. Check your connection and try again." }
         let text = error.localizedDescription
         if text.lowercased().contains("invalid login credentials") { return "Wrong email or password." }
-        if text.contains("Only @unc.edu") || text.lowercased().contains("database error saving new user") {
-            return "Use your @unc.edu email address."
-        }
         return text
     }
 }

@@ -56,7 +56,7 @@ MVVM on top of a repository layer, network-first with a SwiftData cache and an o
 - Tables in use: `profiles`, `study_spots`, `reviews` (one per user per spot), `events`, `event_rsvps` and `saved_spots`. `favorites`, `event_members` and the views `spot_ratings` and `event_member_counts` are legacy and the app doesn't use them.
 - Triggers:
   - `handle_new_user` creates a profile from signup metadata `name`.
-  - `enforce_unc_email` rejects non-`@unc.edu` emails.
+  - Any email domain can sign up. `20261120000001_drop_unc_email_rule.sql` removes the `enforce_unc_email` trigger the v2 migration added.
   - `reviews_refresh_spot_stats` keeps `study_spots.avg_rating`, `review_count` and the consensus attributes current.
   - `study_spots_prevent_duplicate` raises `duplicate_spot:` when a spot within 75 m has a name with trigram similarity ≥ 0.7 and the same digits. The RPC `find_similar_spots` returns softer matches for "Did you mean…?".
 - RLS: any `authenticated` user can read. Writes require `auth.uid()` to match the row's `user_id` or `created_by`, so new write paths must send the current user's id. `study_spots` has no delete policy, so spots are permanent.
