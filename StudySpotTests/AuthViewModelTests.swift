@@ -46,11 +46,11 @@ struct AuthValidationTests {
 
     @Test func signUpValidationOrder() {
         let ok = (name: "Alice", email: "alice@unc.edu", pw: "password1")
-        #expect(AuthViewModel.validateSignUp(name: " ", email: ok.email, password: ok.pw, confirmPassword: ok.pw, agreed: true) == "Enter your name.")
-        #expect(AuthViewModel.validateSignUp(name: ok.name, email: "not-an-email", password: ok.pw, confirmPassword: ok.pw, agreed: true) == "Enter a valid email address.")
-        #expect(AuthViewModel.validateSignUp(name: ok.name, email: ok.email, password: "short", confirmPassword: "short", agreed: true) == "Password must be at least 8 characters.")
-        #expect(AuthViewModel.validateSignUp(name: ok.name, email: ok.email, password: ok.pw, confirmPassword: "different", agreed: true) == "Passwords don't match.")
-        #expect(AuthViewModel.validateSignUp(name: ok.name, email: ok.email, password: ok.pw, confirmPassword: ok.pw, agreed: false) == "Please agree to the Terms and Privacy Policy.")
+        #expect(AuthViewModel.validateSignUp(name: " ", email: ok.email, password: ok.pw, confirmPassword: ok.pw, agreed: true) == "Please enter your name.")
+        #expect(AuthViewModel.validateSignUp(name: ok.name, email: "not-an-email", password: ok.pw, confirmPassword: ok.pw, agreed: true)?.hasPrefix("That doesn't look like an email") == true)
+        #expect(AuthViewModel.validateSignUp(name: ok.name, email: ok.email, password: "short", confirmPassword: "short", agreed: true) == "Almost there: add 3 more characters.")
+        #expect(AuthViewModel.validateSignUp(name: ok.name, email: ok.email, password: ok.pw, confirmPassword: "different", agreed: true) == "These passwords don't match yet.")
+        #expect(AuthViewModel.validateSignUp(name: ok.name, email: ok.email, password: ok.pw, confirmPassword: ok.pw, agreed: false) == "Please agree to the Terms and Privacy Policy to continue.")
         #expect(AuthViewModel.validateSignUp(name: ok.name, email: ok.email, password: ok.pw, confirmPassword: ok.pw, agreed: true) == nil)
     }
 

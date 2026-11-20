@@ -171,14 +171,8 @@ final class AuthViewModel {
 
     static func validateSignUp(name: String, email: String, password: String,
                                confirmPassword: String, agreed: Bool) -> String? {
-        if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return "Enter your name." }
-        if !isValidEmail(email) { return "Enter a valid email address." }
-        if password.count < minimumPasswordLength {
-            return "Password must be at least \(minimumPasswordLength) characters."
-        }
-        if password != confirmPassword { return "Passwords don't match." }
-        if !agreed { return "Please agree to the Terms and Privacy Policy." }
-        return nil
+        SignUpForm(name: name, email: email, password: password,
+                   confirmPassword: confirmPassword, agreed: agreed).firstError
     }
 
     static func isEmailNotConfirmed(_ error: Error) -> Bool {
